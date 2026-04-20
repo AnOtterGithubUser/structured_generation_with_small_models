@@ -1,0 +1,67 @@
+{
+    "number": "49565075",
+    "issue_date": "2019-10-28",
+    "seller": {
+        "name": "Kane-Morgan",
+        "address": {
+            "street_number": "968",
+            "street_name": "Carr Mission",
+            "address_line_2": "Apt. 320",
+            "city": "Bernardville",
+            "state": "VA",
+            "zip_code": "28211"
+        },
+        "tax_id": "964-95-3813",
+        "iban": "GB73WCJ55232646970614"
+    },
+    "client": {
+        "name": "Garcia Inc",
+        "address": {
+            "street_number": "445",
+            "street_name": "Haas Viaduct",
+            "address_line_2": "Suite 454",
+            "city": "Michaelhaven",
+            "state": "LA",
+            "zip_code": "32852"
+        },
+        "tax_id": "909-75-5482"
+    },
+    "items": [
+        {
+            "number": 1,
+            "description": "Anthropologie Gold Elegant Swan Decorative Metal Bottle Stopper Wine Saver",
+            "quantity": "3,00",
+            "unit_of_measure": "each",
+            "net_price": "19,98",
+            "net_worth": "59,94",
+            "vat_percentage": 10,
+            "gross_worth": "65,93"
+        },
+        {
+            "number": 2,
+            "description": "Lolita Happy Retirement Wine Glass 15 Ounce GLS11-5534H",
+            "quantity": "1,00",
+            "unit_of_measure": "each",
+            "net_price": "8,00",
+            "net_worth": "8,00",
+            "vat_percentage": 10,
+            "gross_worth": "8,80"
+        },
+        {
+            "number": 3,
+            "description": "Lolita Happy Retirement Wine Glass 15 Ounce GLS11-5534H",
+            "quantity": "1,00",
+            "unit_of_measure": "each",
+            "net_price": "20,00",
+            "net_worth": "20,00",
+            "vat_percentage": 10,
+            "gross_worth": "22,00"
+        }
+    ],
+    "summary": {
+        "vat_percentage": 10,
+        "net_worth": "87,94",
+        "vat_amount": "8,79",
+        "gross_worth": "96,73"
+    }
+}

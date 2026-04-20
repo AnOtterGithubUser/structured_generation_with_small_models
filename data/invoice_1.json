@@ -1,0 +1,77 @@
+{
+    "number": "61356291",
+    "issue_date": "2012-06-09",
+    "seller": {
+        "name": "Chapman, Kim and Green",
+        "address": {
+            "street_number": "64731",
+            "street_name": "James Branch",
+            "address_line_2": null,
+            "city": "Smithmouth",
+            "state": "NC",
+            "zip_code": "26872"
+        },
+        "tax_id": "949-84-9105",
+        "iban": "GB50ACIE59715038217063"
+    },
+    "client": {
+        "name": "Rodriguez-Stevens",
+        "address": {
+            "street_number": "2280",
+            "street_name": "Angela Plain",
+            "address_line_2": null,
+            "city": "Hortonshire",
+            "state": "MS",
+            "zip_code": "93248"
+        },
+        "tax_id": "939-98-8477"
+    },
+    "items": [
+        {
+            "number": 1,
+            "description": "Wine Glasses Goblets Pair Clear Glass",
+            "quantity": "5,00",
+            "unit_of_measure": "each",
+            "net_price": "12,00",
+            "net_worth": "60,00",
+            "vat_percentage": 10,
+            "gross_worth": "66,00"
+        },
+        {
+            "number": 2,
+            "description": "With Hooks Stemware Storage Multiple Uses Iron Wine Rack Hanging Glass",
+            "quantity": "4,00",
+            "unit_of_measure": "each",
+            "net_price": "28,08",
+            "net_worth": "112,32",
+            "vat_percentage": 10,
+            "gross_worth": "123,55"
+        },
+        {
+            "number": 3,
+            "description": "Replacement Corkscrew Parts Spiral Worm Wine Opener Bottle Houdini",
+            "quantity": "1,00",
+            "unit_of_measure": "each",
+            "net_price": "7,50",
+            "net_worth": "7,50",
+            "vat_percentage": 10,
+            "gross_worth": "8,25"
+        },
+        {
+            "number": 4,
+            "description": "HOME ESSENTIALS GRADIENT STEMLESS WINE GLASSES SET OF 4 20 FL OZ (591 ml) NEW",
+            "quantity": "1,00",
+            "unit_of_measure": "each",
+            "net_price": "12,99",
+            "net_worth": "12,99",
+            "vat_percentage": 10,
+            "gross_worth": "14,29"
+        }
+    ],
+    "summary": {
+        "vat_percentage": 10,
+        "net_worth": "192,81",
+        "vat_amount": "19,28",
+        "gross_worth": "212,09"
+    }
+}
