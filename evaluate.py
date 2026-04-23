@@ -19,7 +19,14 @@ def _field_path(parent: str, field: str | int) -> str:
     return f"{parent}.{field}" if parent else field
 
 
+def _are_equivalent_values(expected: Any, actual: Any) -> bool:
+    return (expected is None and actual == "") or (expected == "" and actual is None)
+
+
 def _find_mismatches(expected: Any, actual: Any, path: str = "") -> list[str]:
+    if _are_equivalent_values(expected, actual):
+        return []
+
     if isinstance(expected, dict) and isinstance(actual, dict):
         mismatches = []
         keys = expected.keys() | actual.keys()
