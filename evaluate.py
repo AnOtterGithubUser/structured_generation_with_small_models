@@ -1,4 +1,5 @@
-from typing import Any, Mapping
+from abc import ABC
+from typing import Any, Generic, Mapping, TypeVar
 from pathlib import Path
 import json
 from pydantic import BaseModel
@@ -8,6 +9,9 @@ from schemas.step_3 import Invoice as Invoice_step_3
 from schemas.step_4 import Invoice as Invoice_step_4
 
 
+T = TypeVar("T", bound=BaseModel)
+
+
 def _field_path(parent: str, field: str | int) -> str:
     if isinstance(field, int):
         return f"{parent}[{field}]"
@@ -15,7 +19,14 @@ def _field_path(parent: str, field: str | int) -> str:
     return f"{parent}.{field}" if parent else field
 
 
+def _are_equivalent_values(expected: Any, actual: Any) -> bool:
+    return (expected is None and actual == "") or (expected == "" and actual is None)
+
+
 def _find_mismatches(expected: Any, actual: Any, path: str = "") -> list[str]:
+    if _are_equivalent_values(expected, actual):
+        return []
+
     if isinstance(expected, dict) and isinstance(actual, dict):
         mismatches = []
         keys = expected.keys() | actual.keys()
@@ -61,89 +72,107 @@ def _assert_invoice_matches(expected: BaseModel, actual: BaseModel, img_path: Pa
     )
 
 
-def evaluate_step_2(invoices: Mapping[str | Path, Invoice_step_2]):
+def _add_empty_thinking_fields(invoice_data: dict[str, Any]) -> dict[str, Any]:
+    invoice_data["thinking"] = None
+    invoice_data["seller"]["address"]["thinking"] = None
+    invoice_data["client"]["address"]["thinking"] = None
+    return invoice_data
 
-    for img_path, predicted_invoice in invoices.items():
 
-        img_path = Path(img_path)
+def _clear_thinking_fields(invoice: T) -> T:
+    invoice = invoice.model_copy(deep=True)
+    invoice.thinking = None
+    invoice.seller.address.thinking = None
+    invoice.client.address.thinking = None
+    return invoice
+
+
+class InvoiceEvaluator(ABC, Generic[T]):
+    invoice_model: type[T]
+    print_report = False
+    raise_on_failure = True
+
+    def evaluate(self, invoices: Mapping[str | Path, T]) -> None:
+        if self.print_report:
+            print("-" * 20)
+            print("EVALUATION")
+
+        for img_path, predicted_invoice in invoices.items():
+            img_path = Path(img_path)
+
+            if self.print_report:
+                print(f"IMG_PATH: {img_path}")
+
+            expected_invoice = self.load_expected_invoice(img_path)
+            predicted_invoice = self.normalize_predicted_invoice(predicted_invoice)
+
+            try:
+                _assert_invoice_matches(expected_invoice, predicted_invoice, img_path)
+                self.on_success()
+            except AssertionError as e:
+                self.on_failure(e)
+
+    def load_expected_invoice(self, img_path: Path) -> T:
         gt_json_path = img_path.with_suffix(".json")
         gt = gt_json_path.read_text(encoding="utf-8")
-        gt_invoice = Invoice_step_2.model_validate_json(gt)
+        gt_json = self.normalize_expected_json(json.loads(gt))
+        return self.invoice_model.model_validate_json(json.dumps(gt_json))
 
-        _assert_invoice_matches(gt_invoice, predicted_invoice, img_path)
+    def normalize_expected_json(self, invoice_data: dict[str, Any]) -> dict[str, Any]:
+        return invoice_data
 
-def evaluate_step_3(invoices: Mapping[str | Path, Invoice_step_3]):
+    def normalize_predicted_invoice(self, invoice: T) -> T:
+        return invoice
 
-    for img_path, predicted_invoice in invoices.items():
-
-        img_path = Path(img_path)
-        gt_json_path = img_path.with_suffix(".json")
-        gt = gt_json_path.read_text(encoding="utf-8")
-        gt_json = json.loads(gt)
-        gt_json["thinking"] = None
-        gt_json["seller"]["address"]["thinking"] = None
-        gt_json["client"]["address"]["thinking"] = None
-        gt_invoice = Invoice_step_3.model_validate_json(json.dumps(gt_json))
-
-        predicted_invoice.thinking = None
-        predicted_invoice.seller.address.thinking = None
-        predicted_invoice.client.address.thinking = None
-
-        _assert_invoice_matches(gt_invoice, predicted_invoice, img_path)
-
-def evaluate_step_4(invoices: Mapping[str | Path, Invoice_step_3]):
-
-    print("-"*20)
-    print("EVALUATION")
-
-    for img_path, predicted_invoice in invoices.items():
-
-        print(f"IMG_PATH: {img_path}")
-
-        img_path = Path(img_path)
-        gt_json_path = img_path.with_suffix(".json")
-        gt = gt_json_path.read_text(encoding="utf-8")
-        gt_json = json.loads(gt)
-        gt_json["thinking"] = None
-        gt_json["seller"]["address"]["thinking"] = None
-        gt_json["client"]["address"]["thinking"] = None
-        gt_invoice = Invoice_step_4.model_validate_json(json.dumps(gt_json))
-
-        predicted_invoice.thinking = None
-        predicted_invoice.seller.address.thinking = None
-        predicted_invoice.client.address.thinking = None
-
-        try:
-            _assert_invoice_matches(gt_invoice, predicted_invoice, img_path)
-        except AssertionError:
-            print("Evaluation failed!")
-
-        print("Evaluation succeeded!")
-
-def evaluate_step_5(invoices: Mapping[str | Path, Invoice_step_3]):
-
-    print("-"*20)
-    print("EVALUATION")
-
-    for img_path, predicted_invoice in invoices.items():
-
-        print(f"IMG_PATH: {img_path}")
-
-        img_path = Path(img_path)
-        gt_json_path = img_path.with_suffix(".json")
-        gt = gt_json_path.read_text(encoding="utf-8")
-        gt_json = json.loads(gt)
-        gt_json["thinking"] = None
-        gt_json["seller"]["address"]["thinking"] = None
-        gt_json["client"]["address"]["thinking"] = None
-        gt_invoice = Invoice_step_4.model_validate_json(json.dumps(gt_json))
-
-        predicted_invoice.thinking = None
-        predicted_invoice.seller.address.thinking = None
-        predicted_invoice.client.address.thinking = None
-
-        try:
-            _assert_invoice_matches(gt_invoice, predicted_invoice, img_path)
+    def on_success(self) -> None:
+        if self.print_report:
             print("Evaluation succeeded!")
-        except AssertionError:
+
+    def on_failure(self, error: AssertionError) -> None:
+        if self.print_report:
             print("Evaluation failed!")
+
+        if self.raise_on_failure:
+            raise error
+
+
+class ThinkingAgnosticInvoiceEvaluator(InvoiceEvaluator[T]):
+    def normalize_expected_json(self, invoice_data: dict[str, Any]) -> dict[str, Any]:
+        return _add_empty_thinking_fields(invoice_data)
+
+    def normalize_predicted_invoice(self, invoice: T) -> T:
+        return _clear_thinking_fields(invoice)
+
+
+class Step2Evaluator(InvoiceEvaluator[Invoice_step_2]):
+    invoice_model = Invoice_step_2
+
+
+class Step3Evaluator(ThinkingAgnosticInvoiceEvaluator[Invoice_step_3]):
+    invoice_model = Invoice_step_3
+
+
+class Step4Evaluator(ThinkingAgnosticInvoiceEvaluator[Invoice_step_4]):
+    invoice_model = Invoice_step_4
+    print_report = True
+    raise_on_failure = False
+
+
+class Step5Evaluator(Step4Evaluator):
+    pass
+
+
+def evaluate_step_2(invoices: Mapping[str | Path, Invoice_step_2]) -> None:
+    Step2Evaluator().evaluate(invoices)
+
+
+def evaluate_step_3(invoices: Mapping[str | Path, Invoice_step_3]) -> None:
+    Step3Evaluator().evaluate(invoices)
+
+
+def evaluate_step_4(invoices: Mapping[str | Path, Invoice_step_4]) -> None:
+    Step4Evaluator().evaluate(invoices)
+
+
+def evaluate_step_5(invoices: Mapping[str | Path, Invoice_step_4]) -> None:
+    Step5Evaluator().evaluate(invoices)

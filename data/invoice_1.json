@@ -6,7 +6,7 @@
         "address": {
             "street_number": "64731",
             "street_name": "James Branch",
-            "address_line_2": null,
+            "address_line_2": "",
             "city": "Smithmouth",
             "state": "NC",
             "zip_code": "26872"
@@ -19,7 +19,7 @@
         "address": {
             "street_number": "2280",
             "street_name": "Angela Plain",
-            "address_line_2": null,
+            "address_line_2": "",
             "city": "Hortonshire",
             "state": "MS",
             "zip_code": "93248"
